@@ -105,10 +105,10 @@ async def delete_all_jobs():
 
     try:
         # Delete all qualified jobs first (cascade will handle raw_posts references)
-        await client.table("qualified_jobs").delete().neq("id", "").execute()
+        await client.table("qualified_jobs").delete().gte("id", "00000000-0000-0000-0000-000000000000").execute()
 
         # Delete all raw posts
-        await client.table("raw_posts").delete().neq("id", "").execute()
+        await client.table("raw_posts").delete().gte("id", "00000000-0000-0000-0000-000000000000").execute()
 
         return {"message": "All jobs and posts deleted successfully", "status": "success"}
     except Exception as e:
