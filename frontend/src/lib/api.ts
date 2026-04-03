@@ -41,6 +41,12 @@ export interface OutreachResponse {
   tone: string
 }
 
+export interface RunQueryResponse {
+  query: string
+  ingested: number
+  qualified: number
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, init)
   if (!res.ok) {
@@ -78,5 +84,17 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ limit }),
+    }),
+
+  runQuery: (query: string, limit = 10) =>
+    request<RunQueryResponse>('/api/v1/run-query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, limit }),
+    }),
+
+  deleteAllJobs: () =>
+    request<{ message: string; status: string }>('/api/v1/jobs', {
+      method: 'DELETE',
     }),
 }

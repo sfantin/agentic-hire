@@ -96,3 +96,23 @@ async def list_jobs(
 
     response = await query.execute()
     return {"total": len(response.data), "jobs": response.data}
+
+
+@router.delete("/jobs")
+async def delete_all_jobs():
+    """Delete all qualified jobs and raw posts from the database."""
+    client = await get_supabase_client()
+
+    try:
+        # Delete all qualified jobs first (cascade will handle raw_posts references)
+        await client.table("qualified_jobs").delete().neq("id", "").execute()
+
+        # Delete all raw posts
+        await client.table("raw_posts").delete().neq("id", "").execute()
+
+        return {"message": "All jobs and posts deleted successfully", "status": "success"}
+    except Exception as e:
+        return {
+            "message": f"Error deleting jobs: {str(e)}",
+            "status": "error",
+        }

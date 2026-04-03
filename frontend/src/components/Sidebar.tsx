@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Briefcase, Mail, BarChart2, Zap } from 'lucide-react'
+import { LayoutDashboard, Search as SearchIcon, Briefcase, Mail, BarChart2, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
 const NAV_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/search', icon: SearchIcon, label: 'Search' },
   { to: '/jobs', icon: Briefcase, label: 'Jobs' },
   { to: '/outreach', icon: Mail, label: 'Outreach' },
   { to: '/gap-analysis', icon: BarChart2, label: 'Gap Analysis' },

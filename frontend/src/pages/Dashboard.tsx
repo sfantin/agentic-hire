@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Briefcase, Star, TrendingUp, Zap, RefreshCw, CheckCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Briefcase, Star, TrendingUp, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -41,11 +42,9 @@ function KpiCard({
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const [data, setData] = useState<JobsResponse | null>(null)
   const [loading, setLoading] = useState(true)
-  const [ingestLoading, setIngestLoading] = useState(false)
-  const [qualifyLoading, setQualifyLoading] = useState(false)
-  const [message, setMessage] = useState('')
 
   useEffect(() => {
     api
@@ -60,34 +59,6 @@ export default function Dashboard() {
     jobs.length > 0 ? Math.round(jobs.reduce((s, j) => s + j.match_score, 0) / jobs.length) : 0
   const recent = [...jobs].slice(0, 5)
 
-  async function handleIngest() {
-    setIngestLoading(true)
-    setMessage('')
-    try {
-      const res = await api.ingest('python engineer remote LATAM', 5)
-      setMessage(`✓ Ingested ${res.ingested} new posts`)
-    } catch (e) {
-      setMessage(`Error: ${e instanceof Error ? e.message : 'Failed'}`)
-    } finally {
-      setIngestLoading(false)
-    }
-  }
-
-  async function handleQualify() {
-    setQualifyLoading(true)
-    setMessage('')
-    try {
-      const res = await api.qualify(5)
-      setMessage(`✓ Qualified ${res.qualified} posts`)
-      const fresh = await api.getJobs({ limit: 50 })
-      setData(fresh)
-    } catch (e) {
-      setMessage(`Error: ${e instanceof Error ? e.message : 'Failed'}`)
-    } finally {
-      setQualifyLoading(false)
-    }
-  }
-
   return (
     <div className="p-8 space-y-8">
       {/* Header */}
@@ -98,40 +69,14 @@ export default function Dashboard() {
             AI-powered job intelligence pipeline
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleIngest}
-            disabled={ingestLoading}
-          >
-            {ingestLoading ? (
-              <RefreshCw className="h-4 w-4 animate-spin" />
-            ) : (
-              <Zap className="h-4 w-4" />
-            )}
-            Ingest
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleQualify}
-            disabled={qualifyLoading}
-          >
-            {qualifyLoading ? (
-              <RefreshCw className="h-4 w-4 animate-spin" />
-            ) : (
-              <CheckCircle className="h-4 w-4" />
-            )}
-            Qualify
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          onClick={() => navigate('/search')}
+        >
+          Run a Search
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
       </div>
-
-      {message && (
-        <p className="text-sm text-muted-foreground border border-border rounded-md px-4 py-2">
-          {message}
-        </p>
-      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

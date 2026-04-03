@@ -1,12 +1,10 @@
 import asyncio
-from contextlib import asynccontextmanager
-from pydantic import BaseModel
-from fastapi import FastAPI
-from app.routers import health, ingest, qualify, outreach
+from fastapi import APIRouter, Body
 from app.services.ingestion_service import ingest_posts
 from app.database import get_supabase_client
 from app.agents.qualification_agent import qualify_post
 
+router = APIRouter(prefix="/api/v1")
 
 DEFAULT_CV = """
 Senior AI/RevOps Engineer with 5+ years experience.
@@ -19,38 +17,17 @@ Location: Brazil — available for remote LATAM/global roles.
 """
 
 
-class RunQueryRequest(BaseModel):
-    query: str
-    limit: int = 10
-    cv_text: str = DEFAULT_CV
-
-
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    # startup
-    yield
-    # shutdown
-
-
-app = FastAPI(
-    title="AgenticHire API",
-    version="0.1.0",
-    lifespan=lifespan,
-)
-
-app.include_router(health.router)
-app.include_router(ingest.router)
-app.include_router(qualify.router)
-app.include_router(outreach.router)
-
-
-@app.post("/api/v1/run-query")
-async def run_query(req: RunQueryRequest):
+@router.post("/run-query")
+async def run_query(
+    query: str = Body(...),
+    limit: int = Body(default=10),
+    cv_text: str = Body(default=DEFAULT_CV),
+):
     """
     Unified pipeline: ingest posts from query → qualify unprocessed → return counts.
     """
     try:
-        ingested_posts = await ingest_posts(req.query)
+        ingested_posts = await ingest_posts(query)
         ingested_count = len(ingested_posts)
 
         client = await get_supabase_client()
@@ -58,7 +35,7 @@ async def run_query(req: RunQueryRequest):
             await client.table("raw_posts")
             .select("id, raw_text, post_url, author_name, search_query")
             .eq("processed", False)
-            .limit(req.limit)
+            .limit(limit)
             .execute()
         )
 
@@ -66,7 +43,7 @@ async def run_query(req: RunQueryRequest):
         if raw.data:
             for post in raw.data:
                 try:
-                    qualification = await qualify_post(post["raw_text"], req.cv_text)
+                    qualification = await qualify_post(post["raw_text"], cv_text)
 
                     await client.table("qualified_jobs").insert({
                         "raw_post_id": post["id"],
@@ -86,13 +63,13 @@ async def run_query(req: RunQueryRequest):
                     pass
 
         return {
-            "query": req.query,
+            "query": query,
             "ingested": ingested_count,
             "qualified": qualified_count,
         }
     except Exception as e:
         return {
-            "query": req.query,
+            "query": query,
             "ingested": 0,
             "qualified": 0,
             "error": str(e),
