@@ -19,7 +19,7 @@ class RawPostCreate(BaseModel):
     author_url: str | None = None
     post_url: str | None = None
     search_query: str | None = None
-    posted_at: datetime | None = None
+    posted_at: str | None = None
     reactions_count: int | None = None
 
 

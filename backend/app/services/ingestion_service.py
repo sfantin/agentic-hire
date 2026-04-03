@@ -11,7 +11,7 @@ def _parse_post_id(link: str) -> str:
     return link.rstrip("/").split("/")[-1] if link else link
 
 
-def _extract_posted_at(post_url: str | None) -> datetime | None:
+def _extract_posted_at(post_url: str | None) -> str | None:
     """Decode timestamp from LinkedIn Activity ID (id >> 22 = ms since epoch)."""
     if not post_url:
         return None
@@ -19,7 +19,8 @@ def _extract_posted_at(post_url: str | None) -> datetime | None:
     if not match:
         return None
     ts_ms = int(match.group(1)) >> 22
-    return datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc)
+    dt = datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc)
+    return dt.isoformat()
 
 
 def _extract_reactions(displayed_link: str | None) -> int | None:
