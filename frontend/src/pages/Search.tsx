@@ -11,7 +11,9 @@ export default function Search() {
   const [freeQuery, setFreeQuery] = useState('')
   const [running, setRunning] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
-  const [showClearDialog, setShowClearDialog] = useState(false)
+  const [showClearQueriesDialog, setShowClearQueriesDialog] = useState(false)
+  const [showClearJobsDialog, setShowClearJobsDialog] = useState(false)
+  const [clearingJobs, setClearingJobs] = useState(false)
 
   const activeQuery = freeQuery.trim() || (selectedIndex !== null ? queries[selectedIndex] : '')
 
@@ -45,19 +47,25 @@ export default function Search() {
     }
   }
 
-  async function handleClearConfirm() {
-    try {
-      // Delete all jobs from backend
-      await api.deleteAllJobs()
+  function handleClearQueries() {
+    clear()
+    setSelectedIndex(null)
+    setShowClearQueriesDialog(false)
+    setStatusMessage(`✓ Queries apagadas`)
+    setTimeout(() => setStatusMessage(''), 3000)
+  }
 
-      // Clear local queries
-      clear()
-      setSelectedIndex(null)
-      setShowClearDialog(false)
-      setStatusMessage(`✓ Histórico e jobs limpos`)
+  async function handleClearJobs() {
+    setClearingJobs(true)
+    try {
+      await api.deleteAllJobs()
+      setShowClearJobsDialog(false)
+      setStatusMessage(`✓ Jobs apagados`)
       setTimeout(() => setStatusMessage(''), 3000)
     } catch (e) {
-      setStatusMessage(`✗ Erro ao limpar: ${e instanceof Error ? e.message : 'Failed'}`)
+      setStatusMessage(`✗ Erro ao apagar jobs: ${e instanceof Error ? e.message : 'Failed'}`)
+    } finally {
+      setClearingJobs(false)
     }
   }
 
@@ -69,17 +77,28 @@ export default function Search() {
           <SearchIcon className="h-6 w-6" />
           <h1 className="text-2xl font-bold">Search Queries</h1>
         </div>
-        {queries.length > 0 && (
+        <div className="flex gap-2">
+          {queries.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowClearQueriesDialog(true)}
+              className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear History
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setShowClearDialog(true)}
+            onClick={() => setShowClearJobsDialog(true)}
             className="text-red-600 hover:text-red-700 hover:bg-red-50"
           >
             <Trash2 className="h-4 w-4" />
-            Clear History
+            Clear Jobs
           </Button>
-        )}
+        </div>
       </div>
 
       {/* Status Message */}
@@ -191,15 +210,15 @@ export default function Search() {
         </Card>
       </div>
 
-      {/* Clear History Confirmation Modal */}
-      {showClearDialog && (
+      {/* Clear Queries Dialog */}
+      {showClearQueriesDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-sm mx-4">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Limpar histórico?</CardTitle>
+                <CardTitle className="text-base">Limpar histórico de queries?</CardTitle>
                 <button
-                  onClick={() => setShowClearDialog(false)}
+                  onClick={() => setShowClearQueriesDialog(false)}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-4 w-4" />
@@ -214,16 +233,58 @@ export default function Search() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowClearDialog(false)}
+                  onClick={() => setShowClearQueriesDialog(false)}
                 >
                   Cancelar
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-red-600 hover:bg-red-700"
-                  onClick={handleClearConfirm}
+                  className="bg-orange-600 hover:bg-orange-700"
+                  onClick={handleClearQueries}
                 >
-                  Limpar Tudo
+                  Apagar Queries
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Clear Jobs Dialog */}
+      {showClearJobsDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-sm mx-4">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Limpar jobs?</CardTitle>
+                <button
+                  onClick={() => setShowClearJobsDialog(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Isso vai deletar todos os jobs e posts da base de dados. Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={clearingJobs}
+                  onClick={() => setShowClearJobsDialog(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={clearingJobs}
+                  className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                  onClick={handleClearJobs}
+                >
+                  {clearingJobs ? 'Apagando...' : 'Apagar Jobs'}
                 </Button>
               </div>
             </CardContent>
