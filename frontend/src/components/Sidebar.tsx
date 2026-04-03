@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Search as SearchIcon, Briefcase, Mail, BarChart2, Zap } from 'lucide-react'
+import { LayoutDashboard, Search as SearchIcon, Briefcase, Mail, BarChart2, Zap, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: '/jobs', icon: Briefcase, label: 'Jobs' },
   { to: '/outreach', icon: Mail, label: 'Outreach' },
   { to: '/gap-analysis', icon: BarChart2, label: 'Gap Analysis' },
+  { to: '/cv-profile', icon: FileText, label: 'CV / Profile' },
 ]
 
 interface SidebarProps {

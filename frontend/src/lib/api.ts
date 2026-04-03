@@ -99,4 +99,13 @@ export const api = {
     request<{ message: string; status: string }>('/api/v1/jobs', {
       method: 'DELETE',
     }),
+
+  uploadCv: (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request<{ message: string; filename: string }>('/api/v1/cv', {
+      method: 'POST',
+      body: formData,
+    })
+  },
 }

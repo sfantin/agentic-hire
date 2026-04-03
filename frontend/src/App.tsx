@@ -5,6 +5,7 @@ import Search from '@/pages/Search'
 import Jobs from '@/pages/Jobs'
 import Outreach from '@/pages/Outreach'
 import GapAnalysis from '@/pages/GapAnalysis'
+import CvProfile from '@/pages/CvProfile'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="jobs" element={<Jobs />} />
           <Route path="outreach" element={<Outreach />} />
           <Route path="gap-analysis" element={<GapAnalysis />} />
+          <Route path="cv-profile" element={<CvProfile />} />
         </Route>
       </Routes>
     </HashRouter>
