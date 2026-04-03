@@ -4,6 +4,8 @@ export interface RawPost {
   post_url: string
   author_name: string
   search_query: string
+  posted_at: string | null
+  reactions_count: number | null
 }
 
 export interface Job {

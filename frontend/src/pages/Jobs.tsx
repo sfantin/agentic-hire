@@ -8,6 +8,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScoreBadge } from '@/components/ScoreBadge'
 import { api, type Job } from '@/lib/api'
 
+function formatRelativeTime(isoString: string): string {
+  const now = Date.now()
+  const then = new Date(isoString).getTime()
+  const diffMs = now - then
+  const diffH = Math.floor(diffMs / 3600000)
+  if (diffH < 1) return 'just now'
+  if (diffH < 24) return `${diffH}h ago`
+  const diffD = Math.floor(diffH / 24)
+  if (diffD < 7) return `${diffD}d ago`
+  return `${Math.floor(diffD / 7)}w ago`
+}
+
 export default function Jobs() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
@@ -90,7 +102,8 @@ export default function Jobs() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Author / Company</TableHead>
-                  <TableHead>Query</TableHead>
+                  <TableHead>Posted</TableHead>
+                  <TableHead>Reactions</TableHead>
                   <TableHead>Score</TableHead>
                   <TableHead>Missing Skills</TableHead>
                   <TableHead>Status</TableHead>
@@ -116,8 +129,17 @@ export default function Jobs() {
                         </a>
                       )}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground max-w-[180px] truncate">
-                      {job.raw_posts?.search_query ?? '—'}
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                      {job.raw_posts?.posted_at
+                        ? formatRelativeTime(job.raw_posts.posted_at)
+                        : '—'}
+                    </TableCell>
+                    <TableCell className="text-xs text-center">
+                      {job.raw_posts?.reactions_count != null
+                        ? <span className={`font-medium ${job.raw_posts.reactions_count <= 10 ? 'text-green-600' : job.raw_posts.reactions_count <= 30 ? 'text-yellow-600' : 'text-muted-foreground'}`}>
+                            {job.raw_posts.reactions_count}+
+                          </span>
+                        : '—'}
                     </TableCell>
                     <TableCell>
                       <ScoreBadge score={job.match_score} />

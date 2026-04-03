@@ -85,9 +85,8 @@ async def list_jobs(
 
     query = (
         client.table("qualified_jobs")
-        .select("*, raw_posts(post_url, author_name, search_query)")
+        .select("*, raw_posts(post_url, author_name, search_query, posted_at, reactions_count)")
         .gte("match_score", min_score)
-        .order("match_score", desc=True)
         .limit(limit)
     )
 
@@ -95,7 +94,23 @@ async def list_jobs(
         query = query.eq("is_high_match", True)
 
     response = await query.execute()
-    return {"total": len(response.data), "jobs": response.data}
+
+    # Sort: newest post first, then fewest reactions (best outreach opportunity)
+    def job_sort_key(job):
+        raw = job.get("raw_posts") or {}
+        posted_at_str = raw.get("posted_at")
+        reactions = raw.get("reactions_count") if raw.get("reactions_count") is not None else 9999
+        ts = 0
+        if posted_at_str:
+            try:
+                from datetime import datetime
+                ts = datetime.fromisoformat(posted_at_str).timestamp()
+            except Exception:
+                pass
+        return (-ts, reactions)
+
+    jobs = sorted(response.data, key=job_sort_key)
+    return {"total": len(jobs), "jobs": jobs}
 
 
 @router.delete("/jobs")
