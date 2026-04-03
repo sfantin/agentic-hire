@@ -14,6 +14,7 @@ async def search_linkedin_posts(query: str) -> list[SerpApiOrganicResult]:
         "engine": "google",
         "q": query,
         "as_sitesearch": "linkedin.com/posts",
+        "tbs": "qdr:w",  # Restrict to last 7 days
         "api_key": settings.serpapi_key,
     }
 
