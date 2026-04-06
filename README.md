@@ -4,6 +4,10 @@ AI-powered job qualification SaaS. Automatically discovers, evaluates, and gener
 
 **Strategic Advantage:** Searches LinkedIn **Posts** (not the Jobs tab) using customizable boolean queries — uncovering recent postings with less competition and visibility.
 
+## Demo
+
+[![AgenticHire Demo](https://img.youtube.com/vi/kgzdWHUec-8/maxresdefault.jpg)](https://youtu.be/kgzdWHUec-8)
+
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18-61DAFB.svg)](https://react.dev)
@@ -58,7 +62,7 @@ AI-powered job qualification SaaS. Automatically discovers, evaluates, and gener
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/agentichire.git
+git clone https://github.com/sfantin/agentic-hire.git
 cd agentichire
 ```
 
@@ -282,7 +286,7 @@ cd frontend
 npm run build
 ```
 
-Static files output to `frontend/out/`
+Static files output to `frontend/dist/`
 
 ### 2. Deploy Backend
 
@@ -296,7 +300,7 @@ Serve the `out/` directory as static files with SPA fallback:
 ```nginx
 server {
     listen 80;
-    root /path/to/frontend/out;
+    root /path/to/frontend/dist;
     
     location / {
         try_files $uri $uri/ /index.html;
